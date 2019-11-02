@@ -39,31 +39,7 @@ float IncPID_Calc(IncPID_t *IncPID, float set_val, float cul_val)
 	IncPID->Kp_err = IncPID->Ek - IncPID->Ek_1;
 
 	//积分差值E[k]
-	IncPID->Ki_err = 0;
-	//-- 抗积分饱和
-	//---- 上过调
-	if(IncPID->out_val > IncPID->val_max)
-	{
-		//防止进一步上过调
-		if(IncPID->Ek <= 0)
-		{
-			IncPID->Ki_err = IncPID->Ek;
-		}
-	}
-	//---- 下过调
-	else if(IncPID->out_val < IncPID->val_min)
-	{
-		//防止进一步下过调
-		if(IncPID->Ek >= 0)
-		{
-			IncPID->Ki_err = IncPID->Ek;
-		}
-	}
-	//---- 未过调
-	else
-	{
-		IncPID->Ki_err = IncPID->Ek;
-	}
+	IncPID->Ki_err = IncPID->Ek;
 
 	//微分差值E[k]-2E[k-1]+E[k-2]
 	IncPID->Kd_err = IncPID->Ek - IncPID->Ek_1 - IncPID->Ek_1 + IncPID->Ek_2;
