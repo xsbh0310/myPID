@@ -25,8 +25,6 @@ struct PositionPID
 
 	float Ek;   //当前差值E[k]
 	float Ek_1; //上次差值E[k-1]
-
-	int Ki_state; //积分项状态
 };
 typedef struct PositionPID PositionPID_t;
 

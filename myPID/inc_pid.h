@@ -11,7 +11,7 @@ struct IncPID
 	float set_val; //设定值
 	float cul_val; //当前值
 	float out_val; //输出值
-	
+
 	float val_min; //最小值
 	float val_max; //最大值
 
@@ -26,8 +26,6 @@ struct IncPID
 	float Ek;   //当前差值E[k]
 	float Ek_1; //上次差值E[k-1]
 	float Ek_2; //上上次差值E[k-2]
-
-	int Ki_state; //积分项状态
 };
 typedef struct IncPID IncPID_t;
 

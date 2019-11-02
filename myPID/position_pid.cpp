@@ -21,23 +21,11 @@ void PositionPID_Init(PositionPID_t *PositionPID, float Kp, float Ki, float Kd, 
 
 	PositionPID->Ek = 0.0;
 	PositionPID->Ek_1 = 0.0;
-
-	PositionPID->Ki_state = 1;
 }
 
 //----------------------------------------------------------------------------
 float PositionPID_Calc(PositionPID_t *PositionPID, float set_val, float cul_val)
 {
-	//超调时关闭积分
-	if( (PositionPID->out_val > PositionPID->val_min) && (PositionPID->out_val < PositionPID->val_max) )
-	{
-		PositionPID->Ki_state = 1;
-	}
-	else
-	{
-		PositionPID->Ki_state = 0;
-	}
-
 	//设定值
 	PositionPID->set_val = set_val;
 	//当前值
@@ -50,14 +38,37 @@ float PositionPID_Calc(PositionPID_t *PositionPID, float set_val, float cul_val)
 	PositionPID->Kp_err = PositionPID->Ek;
 
 	//积分差值E[k...0]
-	PositionPID->Ki_err += PositionPID->Ek;
+	//-- 抗积分饱和
+	//---- 上过调
+	if(PositionPID->out_val > PositionPID->val_max)
+	{
+		//防止进一步上过调
+		if(PositionPID->Ek <= 0)
+		{
+			PositionPID->Ki_err += PositionPID->Ek;
+		}
+	}
+	//---- 下过调
+	else if(PositionPID->out_val < PositionPID->val_min)
+	{
+		//防止进一步下过调
+		if(PositionPID->Ek >= 0)
+		{
+			PositionPID->Ki_err += PositionPID->Ek;
+		}
+	}
+	//---- 未过调
+	else
+	{
+		PositionPID->Ki_err += PositionPID->Ek;
+	}
 
 	//微分差值E[k]-E[k-1]
 	PositionPID->Kd_err = PositionPID->Ek - PositionPID->Ek_1;
 
 	//本次输出
 	PositionPID->out_val  = PositionPID->Kp * PositionPID->Kp_err; //比例E[k]
-	PositionPID->out_val += PositionPID->Ki * PositionPID->Ki_err * PositionPID->Ki_state; //积分E[k...0]
+	PositionPID->out_val += PositionPID->Ki * PositionPID->Ki_err; //积分E[k...0]
 	PositionPID->out_val += PositionPID->Kd * PositionPID->Kd_err; //微分E[k]-E[k-1]
 
 	//输出限位
