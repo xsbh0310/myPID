@@ -38,39 +38,15 @@ float IncPID_Calc(IncPID_t *IncPID, float set_val, float cul_val)
 	//比例差值E[k]-E[k-1]
 	IncPID->Kp_err = IncPID->Ek - IncPID->Ek_1;
 
-	//积分差值E[k]
-	IncPID->Ki_err = 0;
-	//-- 抗积分饱和
-	//---- 上过调
-	if(IncPID->out_val > IncPID->val_max)
-	{
-		//防止进一步上过调
-		if(IncPID->Ek <= 0)
-		{
-			IncPID->Ki_err = IncPID->Ek;
-		}
-	}
-	//---- 下过调
-	else if(IncPID->out_val < IncPID->val_min)
-	{
-		//防止进一步下过调
-		if(IncPID->Ek >= 0)
-		{
-			IncPID->Ki_err = IncPID->Ek;
-		}
-	}
-	//---- 未过调
-	else
-	{
-		IncPID->Ki_err = IncPID->Ek;
-	}
+	//积分差值(E[k]+E[k-1])/2
+	IncPID->Ki_err = (IncPID->Ek + IncPID->Ek_1) / 2;
 
 	//微分差值E[k]-2E[k-1]+E[k-2]
 	IncPID->Kd_err = IncPID->Ek - IncPID->Ek_1 - IncPID->Ek_1 + IncPID->Ek_2;
 
 	//本次输出
 	IncPID->out_val  = IncPID->Kp * IncPID->Kp_err; //比例E[k]-E[k-1]
-	IncPID->out_val += IncPID->Ki * IncPID->Ki_err; //积分E[k]
+	IncPID->out_val += IncPID->Ki * IncPID->Ki_err; //积分(E[k]+E[k-1])/2
 	IncPID->out_val += IncPID->Kd * IncPID->Kd_err; //微分E[k]-2E[k-1]+E[k-2]
 
 	//输出限位
